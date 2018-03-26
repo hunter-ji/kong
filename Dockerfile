@@ -1,4 +1,19 @@
-FROM kong:0.11.2
+FROM centos:7
 LABEL maintainer "Kuari <kuari@justmylife.cc>"
-RUN yum install git -y && luarocks install kong-plugin-cookies-to-headers
+
+ENV KONG_VERSION 0.11.2
+
+RUN yum install -y wget https://bintray.com/kong/kong-community-edition-rpm/download_file?file_path=centos/7/kong-community-edition-$KONG_VERSION.el7.noarch.rpm && \
+    yum install git -y && \ 
+    luarocks install kong-plugin-cookies-to-headers && \
+    yum clean all
+
+
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+EXPOSE 8000 8443 8001 8444
+
+STOPSIGNAL SIGTERM
+
 CMD ["/usr/local/openresty/nginx/sbin/nginx", "-c", "/usr/local/kong/nginx.conf", "-p", "/usr/local/kong/"]
